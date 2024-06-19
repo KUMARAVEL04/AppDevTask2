@@ -25,22 +25,24 @@ import java.util.Random;
     Character jerry,tom;
     float[] widths = new float[4];
     ArrayList<Obstacles> obsList = new ArrayList<>();
+    ArrayList<Additives> addList = new ArrayList<>();
     int collision=0;
     boolean immFram=true;
     boolean cutscene = true;
     boolean startCutscene=false;
+    Random random =new Random();
 
     Bitmap mouse = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_3);
     Bitmap cat = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_4);
+
     Bitmap icon = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.group_2);
-
-
+    Bitmap add = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.group_10);
     float score=0f;
-
 
     public myView(Context context) {
         super(context);
         obsList.clear();
+        addList.clear();
         paint1 = new Paint();
         paint1.setColor(Color.parseColor("#f9eee0"));
         paint1.setStrokeWidth(10);
@@ -54,6 +56,13 @@ import java.util.Random;
             a--;
             if(a>-2){
                 jerry.offset(-width*5/16,0);
+                final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    }
+                });
+                mp.start();
             }
             else{
                 a++;
@@ -63,6 +72,13 @@ import java.util.Random;
             a++;
             if(a<2){
                 jerry.offset(width*5/16,0);
+                final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mp.release();
+                    }
+                });
+                mp.start();
             }
             else{
                 a--;
@@ -103,6 +119,11 @@ import java.util.Random;
             Obstacles b = iterator21.next();
             canvas.drawBitmap(icon,null,b.draw(canvas),b.paint);
         }
+        Iterator<Additives> iterator22 = addList.iterator();
+        while (iterator22.hasNext()) {
+            Additives b = iterator22.next();
+            canvas.drawBitmap(add,null,b.draw(canvas),b.paint);
+        }
         Integer txtscore = (int) score;
         Paint textpaint = new Paint();
         textpaint.isAntiAlias();
@@ -137,9 +158,20 @@ import java.util.Random;
             }
         }
         score+=0.1f;
+        Obstacles.speed=(float)Math.min(Obstacles.speed+0.01,75);
         Iterator<Obstacles> iterator1 = obsList.iterator();
         while(iterator1.hasNext()){
             iterator1.next().updatePosition();
+        }
+        Iterator<Additives> additerator = addList.iterator();
+        while(additerator.hasNext()){
+            additerator.next().updatePosition();
+        }
+        additerator = addList.iterator();
+        while(additerator.hasNext()){
+            if(additerator.next().isOut()){
+                additerator.remove();
+            }
         }
         Iterator<Obstacles> iterator = obsList.iterator();
         while(iterator.hasNext()){
@@ -148,6 +180,7 @@ import java.util.Random;
                 tomMove();
             }
         }
+
         jerryIntersects();
         tomMove();
         if(collision>1||(score>200&&!infinite)){
@@ -180,9 +213,8 @@ import java.util.Random;
     }
     public void addObstacle(){
         boolean[] combo = {false,false,false};
-        Random rand = new Random();
-        int first = rand.nextInt(3);
-        int second = rand.nextInt(3);
+        int first = random.nextInt(3);
+        int second = random.nextInt(3);
         combo[first]=true;
         combo[second]=true;
         ArrayList<Integer> soln = new ArrayList<>();
@@ -213,7 +245,6 @@ import java.util.Random;
 //            obsList.add(ab);
 //        }
     }
-
     public void tomMove(){
         boolean move = false;
         boolean right = b != 1;
@@ -271,7 +302,7 @@ import java.util.Random;
     }
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
-        while(iterator2.hasNext()&& jerry.getColDur()==0){
+        while(iterator2.hasNext()&& jerry.getColDur()==0 && collision<1){
             if(iterator2.next().intersect(jerry)){
                 if(collision<1){
                     final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.wrong);
@@ -294,11 +325,48 @@ import java.util.Random;
                 collision++;
             }
         }
+        Iterator<Additives> additivesIterator = addList.iterator();
+        while(additivesIterator.hasNext()&& jerry.getColDur()==0){
+            Additives additives = additivesIterator.next();
+            if(additives.intersect(jerry)){
+                if(additives.luck==0){
+                    Obstacles.speed+=5f;
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.badluck);
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    mp.start();
+                }else{
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.goodluck);
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    mp.start();
+                    if(random.nextInt(2)==0 || obsList.size()<2){
+                        Obstacles.speed-=5f;
+                    }
+                    else{
+                        obsList.remove(obsList.size()-1);
+                        obsList.remove(obsList.size()-2);
+                    }
+                }
+                additivesIterator.remove();
+            }
+        }
     }
-
-
     public ArrayList<Obstacles> getObsList() {
         return obsList;
+    }
+    public void addAdditive(){
+        int luck = random.nextInt(2);
+        int lane = random.nextInt(3);
+        Additives ad = new Additives(widths[1],widths[1]/4,luck);
+        ad.setPosition(widths[lane],lane-1);
+        addList.add(ad);
     }
 
 

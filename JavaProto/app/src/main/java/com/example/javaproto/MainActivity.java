@@ -15,6 +15,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private Handler handler;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         decor_View.setSystemUiVisibility(ui_Options);
         handler = new Handler();
         boolean infinite = getIntent().getBooleanExtra("Infinite",false);
+        Random random = new Random();
         run = new Runnable() {
             @Override
             public void run() {
@@ -50,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
                 if(ab.size()<15&& !ab.isEmpty() && canvasView.startCutscene){
                     if(ab.get(ab.size()-1).getTop()>canvasView.tom.height()*1.7f) {
                         canvasView.addObstacle();
+                        if(random.nextInt(10)==1){
+                            delayedHandler(canvasView);
+                        }
                     }
                 }
                 if(!ifPause && !canvasView.end)
@@ -66,6 +71,16 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         ifPause=false;
         handler.postDelayed(run,1000/10);
+    }
+    public void delayedHandler(myView canvasView){
+        Handler handler1 = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                canvasView.addAdditive();
+            }
+        };
+        handler1.postDelayed(run,500);
     }
 
     @Override
