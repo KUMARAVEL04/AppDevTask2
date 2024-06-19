@@ -9,6 +9,9 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.media.MediaPlayer;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -40,6 +43,7 @@ import java.util.Random;
     Bitmap icon = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.group_2);
     Bitmap add = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.group_10);
     float score=0f;
+    Context context;
 
     public myView(Context context) {
         super(context);
@@ -49,6 +53,16 @@ import java.util.Random;
         paint1.setColor(Color.parseColor("#f9eee0"));
         paint1.setStrokeWidth(10);
         paintx = new Paint();
+        this.context=context;
+    }
+    public void vibrate(int a){
+        final Vibrator v = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(a, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            //deprecated in API 26
+            v.vibrate(a);
+        }
     }
 
     @Override
@@ -66,6 +80,7 @@ import java.util.Random;
                         }
                     });
                     mp.start();
+                    vibrate(80);
                 } else {
                     a++;
                 }
@@ -80,6 +95,7 @@ import java.util.Random;
                         }
                     });
                     mp.start();
+                    vibrate(80);
                 } else {
                     a--;
                 }
@@ -164,7 +180,7 @@ import java.util.Random;
             }
         }
         score+=0.1f;
-        Obstacles.speed=(float)Math.min(Obstacles.speed+0.01,75);
+        Obstacles.speed=(float)Math.min(Obstacles.speed+0.001,75);
         Iterator<Obstacles> iterator1 = obsList.iterator();
         while(iterator1.hasNext()){
             iterator1.next().updatePosition();
@@ -295,7 +311,7 @@ import java.util.Random;
     }
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
-        while(iterator2.hasNext()&& jerry.getColDur()==0){
+        while(iterator2.hasNext()&& jerry.getColDur()==0 && collision<1){
             if(iterator2.next().intersect(jerry)){
                 if(collision<1){
                     final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.wrong);
@@ -305,6 +321,7 @@ import java.util.Random;
                         }
                     });
                     mp.start();
+                    vibrate(500);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -323,8 +340,14 @@ import java.util.Random;
             Additives additives = additivesIterator.next();
             if(additives.intersect(jerry)){
                 if(additives.luck==0){
-                    Obstacles.speed+=5f;
-                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.badluck);
+                    if(random.nextInt()==0 && collision>0){
+                        Obstacles.speed-=5f;
+                    }
+                    else{
+                        collision--;
+                        cutscene=true;
+                    }
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.goodluck);
                     mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         public void onCompletion(MediaPlayer mp) {
                             mp.release();
@@ -332,7 +355,7 @@ import java.util.Random;
                     });
                     mp.start();
                 }else{
-                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.goodluck);
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.badluck);
                     mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         public void onCompletion(MediaPlayer mp) {
                             mp.release();
@@ -341,11 +364,11 @@ import java.util.Random;
                     mp.start();
                     if(random.nextInt(2)==0 || obsList.size()<2){
                         if(random.nextInt(2)==0){
-                            Obstacles.speed-=5f;
+                            Obstacles.speed+=5f;
                         }
                         else{
                             jerry.paint3.setColorFilter(new PorterDuffColorFilter(0x6fff6347, PorterDuff.Mode.SRC_IN));;
-                            immobile=100;
+                            immobile=70;
                         }
                     }
                     else{

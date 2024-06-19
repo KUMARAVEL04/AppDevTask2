@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 canvasView.addAdditive();
             }
         };
-        handler1.postDelayed(run,500);
+        handler1.postDelayed(run,250);
     }
 
     @Override
