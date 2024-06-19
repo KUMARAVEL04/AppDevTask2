@@ -38,10 +38,11 @@ public class MainActivity extends AppCompatActivity {
 
         decor_View.setSystemUiVisibility(ui_Options);
         handler = new Handler();
+        boolean infinite = getIntent().getBooleanExtra("Infinite",false);
         run = new Runnable() {
             @Override
             public void run() {
-                canvasView.update();
+                canvasView.update(infinite);
                 if(canvasView.collision>1){
                     handler.removeCallbacksAndMessages(null);
                 }
@@ -81,12 +82,7 @@ public class MainActivity extends AppCompatActivity {
         Button plyAg= winBox.getWindow().findViewById(R.id.playButton);
         Button homeBut= winBox.getWindow().findViewById(R.id.homeButton);
         Button textBut= winBox.getWindow().findViewById(R.id.nameField);
-        if(scorx>=200){
-            textBut.setText("YOU WON");
-        }
-        else{
-            textBut.setText("YOU LOST");
-        }
+        textBut.setText("GAME OVER");
         score.setText("Score: " + scorx.toString());
         plyAg.setOnClickListener(v -> {
             winBox.dismiss();

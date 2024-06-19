@@ -6,12 +6,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.media.MediaPlayer;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -90,7 +87,6 @@ import java.util.Random;
         if(ifStart){
             ifStart=!ifStart;
             addObstacle();
-//            jerry = new Character(width/2-smallWidth,getHeight()*0.7f-smallWidth,width/2+smallWidth,getHeight()*0.7f+smallWidth);
             jerry = new Character(width/2-smallWidth,getHeight(),width/2+smallWidth,getHeight()+2*smallWidth);
             tom = new Character(width/2-width/8,getHeight()*1.2f,width/2+width/8,getHeight()*1.2f+width/4);
         }
@@ -110,21 +106,21 @@ import java.util.Random;
         Integer txtscore = (int) score;
         Paint textpaint = new Paint();
         textpaint.isAntiAlias();
-        textpaint.setTextSize(70);
+        textpaint.setTextSize(getHeight()*0.025f);
         textpaint.setColor(Color.WHITE);
-        canvas.drawCircle(getWidth()*0.75f,90f,83f,textpaint);
-        canvas.drawCircle(getWidth()*0.95f,90f,83f,textpaint);
-        canvas.drawRect(getWidth()*0.75f,7f,getWidth()*0.95f,173f,textpaint);
+        canvas.drawCircle(getWidth()*0.55f,getHeight()*0.08f,getHeight()*0.03f,textpaint);
+        canvas.drawCircle(getWidth()*0.85f,getHeight()*0.08f,getHeight()*0.03f,textpaint);
+        canvas.drawRect(getWidth()*0.55f,getHeight()*0.08f-getHeight()*0.03f,getWidth()*0.85f,getHeight()*0.08f+getHeight()*0.03f,textpaint);
         textpaint.setColor(Color.DKGRAY);
-        canvas.drawCircle(getWidth()*0.75f,90f,70f,textpaint);
-        canvas.drawCircle(getWidth()*0.95f,90f,70f,textpaint);
-        canvas.drawRect(getWidth()*0.75f,20f,getWidth()*0.95f,160f,textpaint);
+        canvas.drawCircle(getWidth()*0.55f,getHeight()*0.08f,getHeight()*0.025f,textpaint);
+        canvas.drawCircle(getWidth()*0.85f,getHeight()*0.08f,getHeight()*0.025f,textpaint);
+        canvas.drawRect(getWidth()*0.55f,getHeight()*0.08f-getHeight()*0.025f,getWidth()*0.85f,getHeight()*0.08f+getHeight()*0.025f,textpaint);
         textpaint.setColor(Color.WHITE);
-        canvas.drawText("Score: "+txtscore.toString(),getWidth()*0.745f,120f,textpaint);
+        canvas.drawText("Score: "+txtscore.toString(),getWidth()*0.576f,getHeight()*0.08f+getHeight()*0.01f,textpaint);
         super.onDraw(canvas);
     }
 
-    public void update() {
+    public void update(boolean infinite) {
         if(!startCutscene){
             tom.offset(0f,-6f);
             jerry.offset(0f,-6f);
@@ -154,16 +150,10 @@ import java.util.Random;
         }
         jerryIntersects();
         tomMove();
-        if(collision>1||score>200){
+        if(collision>1||(score>200&&!infinite)){
             if(score<200){
-                Toast toast = Toast.makeText(getContext(),"GAME END",Toast.LENGTH_LONG);
-                toast.show();
                 tom.offset(jerry.centerX()-tom.centerX(),-50);
                 invalidate();
-            }
-            else{
-                Toast toast = Toast.makeText(getContext(),"YOU WON",Toast.LENGTH_LONG);
-                toast.show();
             }
             end=true;
         }
@@ -189,20 +179,39 @@ import java.util.Random;
         invalidate();
     }
     public void addObstacle(){
+        boolean[] combo = {false,false,false};
         Random rand = new Random();
-        int x = rand.nextInt(1)+1;
-        for(int i=0;i<x;i++) {
-            Obstacles ab = new Obstacles(widths[1], 120);
-            int randInt = rand.nextInt(5) % 3;
-            if (randInt == 1) {
-                ab.setPosition(widths[0],-1);
-            } else if (randInt == 2) {
-                ab.setPosition(widths[1],0);
-            } else {
-                ab.setPosition(widths[2],1);
+        int first = rand.nextInt(3);
+        int second = rand.nextInt(3);
+        combo[first]=true;
+        combo[second]=true;
+        ArrayList<Integer> soln = new ArrayList<>();
+        for(int i=0;i<3;i++){
+            if(!combo[i]){
+                soln.add(i);
             }
-            obsList.add(ab);
         }
+        for(int i=0; i<3;i++){
+            if(combo[i]){
+                Obstacles ab = new Obstacles(widths[1],widths[1]/4);
+                ab.setPosition(widths[i],i-1);
+                ab.solution.addAll(soln);
+                obsList.add(ab);
+            }
+        }
+//        System.out.println(rand);
+//        for(int i=0;i<x;i++) {
+//            Obstacles ab = new Obstacles(widths[1], 120);
+//            int randInt = rand.nextInt(5) % 3;
+//            if (randInt == 1) {
+//                ab.setPosition(widths[0],-1);
+//            } else if (randInt == 2) {
+//                ab.setPosition(widths[1],0);
+//            } else {
+//                ab.setPosition(widths[2],1);
+//            }
+//            obsList.add(ab);
+//        }
     }
 
     public void tomMove(){
@@ -210,17 +219,25 @@ import java.util.Random;
         boolean right = b != 1;
         boolean left = b != -1;
         Iterator<Obstacles> iteratorx = obsList.iterator();
+        ArrayList<Integer> path = new ArrayList<>();
         while(iteratorx.hasNext()){
             Obstacles ab = iteratorx.next();
             if(ab.centerX()==tom.centerX()&& ab.bottom>tom.top*0.8f && ab.top<tom.bottom){
                 move=true;
+                path.addAll(ab.solution);
+                break;
             }
         }
         Iterator<Obstacles> iteratorx1 = obsList.iterator();
         if(move){
+            if(path.get(0)>b){
+                left=false;
+            }
+            if(path.get(0)<b){
+                right=false;
+            }
             while(iteratorx1.hasNext()){
                 Obstacles ab = iteratorx1.next();
-
                 if(ab.lane==b-1 && ab.bottom>tom.top && ab.top<tom.bottom){
                     left=false;
                 }
@@ -252,7 +269,6 @@ import java.util.Random;
             }
         }
     }
-
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
         while(iterator2.hasNext()&& jerry.getColDur()==0){

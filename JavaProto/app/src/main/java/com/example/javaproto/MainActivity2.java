@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,12 +29,16 @@ public class MainActivity2 extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        CheckBox tick = findViewById(R.id.checkBox);
         Button button = findViewById(R.id.startButton);
         button.setOnClickListener(v -> {
+            button.setClickable(false);
+            boolean infinite = tick.isChecked();
             TextView title = findViewById(R.id.textView);
             ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(title, "alpha", 1f, 0f);
-            fadeAnimator.setDuration(1000); // 1 second
+            fadeAnimator.setDuration(1000);
+            ObjectAnimator fadeAnimatortick = ObjectAnimator.ofFloat(tick, "alpha", 1f, 0f);
+            fadeAnimator.setDuration(1000);
 
             ObjectAnimator fadeAnimator3 = ObjectAnimator.ofFloat(button, "alpha", 1f, 0f);
             fadeAnimator3.setDuration(1000);
@@ -53,7 +58,7 @@ public class MainActivity2 extends AppCompatActivity {
             translateAnimator1.setStartDelay(100);
 
             AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playTogether(fadeAnimator,fadeAnimator1, translateAnimator1,fadeAnimator2, translateAnimator2,fadeAnimator3);
+            animatorSet.playTogether(fadeAnimatortick,fadeAnimator,fadeAnimator1, translateAnimator1,fadeAnimator2, translateAnimator2,fadeAnimator3);
             animatorSet.setDuration(1000);
             animatorSet.addListener(new Animator.AnimatorListener() {
                 @Override
@@ -64,6 +69,7 @@ public class MainActivity2 extends AppCompatActivity {
                 @Override
                 public void onAnimationEnd(@NonNull Animator animation) {
                     Intent intent = new Intent(MainActivity2.this,MainActivity.class);
+                    intent.putExtra("Infinite",infinite);
                     startActivity(intent);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
