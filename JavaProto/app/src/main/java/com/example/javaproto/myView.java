@@ -1,14 +1,16 @@
 package com.example.javaproto;
 
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.media.MediaPlayer;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -32,11 +34,10 @@ import java.util.Random;
     boolean immFram=true;
     boolean cutscene = true;
     boolean startCutscene=false;
-
+    Context context;
     Bitmap mouse = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_3);
     Bitmap cat = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_4);
     Bitmap icon = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.group_2);
-
 
     float score=0f;
 
@@ -48,6 +49,15 @@ import java.util.Random;
         paint1.setColor(Color.parseColor("#f9eee0"));
         paint1.setStrokeWidth(10);
         paintx = new Paint();
+        this.context=context;
+    }
+    public void vibrate(int a){
+        Vibrator v = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            v.vibrate(VibrationEffect.createOneShot(a, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            v.vibrate(a);
+        }
     }
 
     @Override
@@ -57,6 +67,7 @@ import java.util.Random;
             a--;
             if(a>-2){
                 jerry.offset(-width*5/16,0);
+                vibrate(100);
             }
             else{
                 a++;
@@ -66,6 +77,7 @@ import java.util.Random;
             a++;
             if(a<2){
                 jerry.offset(width*5/16,0);
+                vibrate(100);
             }
             else{
                 a--;
@@ -265,6 +277,7 @@ import java.util.Random;
                         }
                     });
                     mp.start();
+                    vibrate(800);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
