@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.media.MediaPlayer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,7 +33,7 @@ import java.util.Random;
     boolean cutscene = true;
     boolean startCutscene=false;
     Random random =new Random();
-
+    int immobile=0;
     Bitmap mouse = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_3);
     Bitmap cat = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.frame_4);
 
@@ -52,36 +54,35 @@ import java.util.Random;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float width = widths[1]*2;
-        if(0<=event.getX()&&event.getX()<width/2){
-            a--;
-            if(a>-2){
-                jerry.offset(-width*5/16,0);
-                final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
-                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    public void onCompletion(MediaPlayer mp) {
-                        mp.release();
-                    }
-                });
-                mp.start();
-            }
-            else{
-                a++;
-            }
-        }
-        else{
-            a++;
-            if(a<2){
-                jerry.offset(width*5/16,0);
-                final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
-                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    public void onCompletion(MediaPlayer mp) {
-                        mp.release();
-                    }
-                });
-                mp.start();
-            }
-            else{
+        if(immobile<1){
+            if (0 <= event.getX() && event.getX() < width / 2) {
                 a--;
+                if (a > -2) {
+                    jerry.offset(-width * 5 / 16, 0);
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    mp.start();
+                } else {
+                    a++;
+                }
+            } else {
+                a++;
+                if (a < 2) {
+                    jerry.offset(width * 5 / 16, 0);
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sweep);
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                        }
+                    });
+                    mp.start();
+                } else {
+                    a--;
+                }
             }
         }
         return super.onTouchEvent(event);
@@ -142,6 +143,12 @@ import java.util.Random;
     }
 
     public void update(boolean infinite) {
+        if(immobile>0){
+            immobile--;
+            if(immobile<1){
+                jerry.paint3.setColorFilter(null);
+            }
+        }
         if(!startCutscene){
             tom.offset(0f,-6f);
             jerry.offset(0f,-6f);
@@ -151,7 +158,6 @@ import java.util.Random;
             }
         }
         else if(cutscene){
-
             tom.offset(0f,2f);
             if(tom.top>getHeight()){
                 cutscene=false;
@@ -231,19 +237,6 @@ import java.util.Random;
                 obsList.add(ab);
             }
         }
-//        System.out.println(rand);
-//        for(int i=0;i<x;i++) {
-//            Obstacles ab = new Obstacles(widths[1], 120);
-//            int randInt = rand.nextInt(5) % 3;
-//            if (randInt == 1) {
-//                ab.setPosition(widths[0],-1);
-//            } else if (randInt == 2) {
-//                ab.setPosition(widths[1],0);
-//            } else {
-//                ab.setPosition(widths[2],1);
-//            }
-//            obsList.add(ab);
-//        }
     }
     public void tomMove(){
         boolean move = false;
@@ -302,7 +295,7 @@ import java.util.Random;
     }
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
-        while(iterator2.hasNext()&& jerry.getColDur()==0 && collision<1){
+        while(iterator2.hasNext()&& jerry.getColDur()==0){
             if(iterator2.next().intersect(jerry)){
                 if(collision<1){
                     final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.wrong);
@@ -347,7 +340,13 @@ import java.util.Random;
                     });
                     mp.start();
                     if(random.nextInt(2)==0 || obsList.size()<2){
-                        Obstacles.speed-=5f;
+                        if(random.nextInt(2)==0){
+                            Obstacles.speed-=5f;
+                        }
+                        else{
+                            jerry.paint3.setColorFilter(new PorterDuffColorFilter(0x6fff6347, PorterDuff.Mode.SRC_IN));;
+                            immobile=100;
+                        }
                     }
                     else{
                         obsList.remove(obsList.size()-1);
