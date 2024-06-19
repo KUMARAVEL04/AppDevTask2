@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">CheeseChase</string>
+    <string name="app_name">Cheese Chase</string>
+    <string name="start">START</string>
 </resources>

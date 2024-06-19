@@ -2,6 +2,7 @@ package com.example.javaproto;
 
 import android.app.Dialog;
 import android.content.Intent;
+
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private Handler handler;
@@ -37,10 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
         decor_View.setSystemUiVisibility(ui_Options);
         handler = new Handler();
+        boolean infinite = getIntent().getBooleanExtra("Infinite",false);
+        Random random = new Random();
         run = new Runnable() {
             @Override
             public void run() {
-                canvasView.update();
+                canvasView.update(infinite);
                 if(canvasView.collision>1){
                     handler.removeCallbacksAndMessages(null);
                 }
@@ -48,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
                 if(ab.size()<15&& !ab.isEmpty() && canvasView.startCutscene){
                     if(ab.get(ab.size()-1).getTop()>canvasView.tom.height()*1.7f) {
                         canvasView.addObstacle();
+                        if(random.nextInt(10)==1){
+                            delayedHandler(canvasView);
+                        }
                     }
                 }
                 if(!ifPause && !canvasView.end)
@@ -65,6 +72,16 @@ public class MainActivity extends AppCompatActivity {
         ifPause=false;
         handler.postDelayed(run,1000/10);
     }
+    public void delayedHandler(myView canvasView){
+        Handler handler1 = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                canvasView.addAdditive();
+            }
+        };
+        handler1.postDelayed(run,250);
+    }
 
     @Override
     protected void onPause() {
@@ -80,12 +97,7 @@ public class MainActivity extends AppCompatActivity {
         Button plyAg= winBox.getWindow().findViewById(R.id.playButton);
         Button homeBut= winBox.getWindow().findViewById(R.id.homeButton);
         Button textBut= winBox.getWindow().findViewById(R.id.nameField);
-        if(scorx>=200){
-            textBut.setText("YOU WON");
-        }
-        else{
-            textBut.setText("YOU LOST");
-        }
+        textBut.setText("GAME OVER");
         score.setText("Score: " + scorx.toString());
         plyAg.setOnClickListener(v -> {
             winBox.dismiss();

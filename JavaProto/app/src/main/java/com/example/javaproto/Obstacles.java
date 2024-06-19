@@ -1,24 +1,24 @@
 package com.example.javaproto;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+
+import java.util.ArrayList;
 
 public class Obstacles extends RectF{
     public float sizx;
     private boolean isOut=false;
     public int lane=0;
-    public float speed=15f;
+    public static float speed=15f;
     public Paint paint;
+    public ArrayList<Integer> solution = new ArrayList<>();
     public Obstacles(float width, float size) {
         this.sizx=size;
         this.top=0;
         this.bottom=this.top+size;
         this.right=width-size/2;
         this.left=width+size/2;
-        Paint paint = new Paint();
     }
 
     public float getTop() {
@@ -34,13 +34,6 @@ public class Obstacles extends RectF{
 
     public boolean isOut() {
         return isOut;
-    }
-    public void draw(Canvas canvas, Bitmap bitmap){
-        RectF rectF1=new RectF(left,top,right,bottom);
-        canvas.drawBitmap(bitmap,null,this,paint);
-        if(canvas.getHeight()<top){
-            isOut=true;
-        }
     }
     public RectF draw(Canvas canvas){
         if(canvas.getHeight()<top){
