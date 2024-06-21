@@ -313,7 +313,7 @@ import java.util.Random;
     }
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
-        while(iterator2.hasNext()&& jerry.getColDur()==0 && collision<1){
+        while(iterator2.hasNext()&& jerry.getColDur()==0){
             if(iterator2.next().intersect(jerry)){
                 if(collision<1){
                     final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.wrong);
