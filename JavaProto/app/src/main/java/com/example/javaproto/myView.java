@@ -242,7 +242,7 @@ import java.util.Random;
         ArrayList<Integer> soln = new ArrayList<>();
         for(int i=0;i<3;i++){
             if(!combo[i]){
-                soln.add(i);
+                soln.add(i-1);
             }
         }
         for(int i=0; i<3;i++){
@@ -262,7 +262,7 @@ import java.util.Random;
         ArrayList<Integer> path = new ArrayList<>();
         while(iteratorx.hasNext()){
             Obstacles ab = iteratorx.next();
-            if(ab.centerX()==tom.centerX()&& ab.bottom>tom.top*0.8f && ab.top<tom.bottom){
+            if(ab.centerX()==tom.centerX()&& ab.bottom>tom.top*0.85f && ab.top<tom.top){
                 move=true;
                 path.addAll(ab.solution);
                 break;
@@ -291,6 +291,7 @@ import java.util.Random;
             left=false;
         }
         if(left){
+            System.out.println("Left");
             b--;
             if(b>-2){
                 tom.offset(-widths[1]*5/8,0);
@@ -300,6 +301,7 @@ import java.util.Random;
             }
         }
         else if(right){
+            System.out.println("Right");
             b++;
             if(b<2){
                 tom.offset(widths[1]*5/8,0);
@@ -311,7 +313,7 @@ import java.util.Random;
     }
     public void jerryIntersects(){
         Iterator<Obstacles> iterator2 = obsList.iterator();
-        while(iterator2.hasNext()&& jerry.getColDur()==0){
+        while(iterator2.hasNext()&& jerry.getColDur()==0 && collision<1){
             if(iterator2.next().intersect(jerry)){
                 if(collision<1){
                     final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.wrong);
@@ -322,12 +324,6 @@ import java.util.Random;
                     });
                     mp.start();
                     vibrate(500);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
                 }
                 iterator2.remove();
                 jerry.setColDur(100);
